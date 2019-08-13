@@ -30,35 +30,40 @@
 #include "../include/zmq.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include "shared_perf_utils.h"
 
 // keys are arbitrary but must match remote_lat.cpp
 const char server_prvkey[] = "{X}#>t#jRGaQ}gMhv=30r(Mw+87YGs+5%kh=i@f8";
 
+
 int main (int argc, char *argv[])
 {
     const char *bind_to;
-    int message_count;
+    int duration_sec = 10;
     size_t message_size;
+    size_t message_count;
     void *ctx;
     void *s;
     int rc;
-    int i;
     zmq_msg_t msg;
     void *watch;
-    unsigned long elapsed;
+    unsigned long elapsed_us;
     double throughput;
     double megabits;
     int curve = 0;
     int zmq_bg_threads = 1;
 
-    if (argc != 4 && argc != 5 && argc != 6) {
-        printf ("usage: local_thr <bind-to> <message-size> <message-count> "
-                "[<enable_curve>] [<num_bg_threads>]\n");
+    if (argc != 3 && argc != 4 && argc != 5 && argc != 6) {
+        printf (
+          "usage: local_thr <bind-to> <message-size> [<duration-of-test-sec>] "
+          "[<enable_curve>] [<num_bg_threads>]\n");
         return 1;
     }
     bind_to = argv[1];
     message_size = atoi (argv[2]);
-    message_count = atoi (argv[3]);
+    if (argc >= 4) {
+        duration_sec = atoi (argv[3]);
+    }
     if (argc >= 5) {
         curve = atoi (argv[4]);
     }
@@ -95,6 +100,11 @@ int main (int argc, char *argv[])
         }
     }
 
+    if (set_fixed_tcp_kernel_buff (s) != 0)
+        return -1;
+    if (set_batching (s) != 0)
+        return -1;
+
     rc = zmq_bind (s, bind_to);
     if (rc != 0) {
         printf ("error in zmq_bind: %s\n", zmq_strerror (errno));
@@ -119,7 +129,7 @@ int main (int argc, char *argv[])
 
     watch = zmq_stopwatch_start ();
 
-    for (i = 0; i != message_count - 1; i++) {
+    for (message_count = 0;; message_count++) {
         rc = zmq_recvmsg (s, &msg, 0);
         if (rc < 0) {
             printf ("error in zmq_recvmsg: %s\n", zmq_strerror (errno));
@@ -129,11 +139,17 @@ int main (int argc, char *argv[])
             printf ("message of incorrect size received\n");
             return -1;
         }
+
+        if ((message_count % 1000) == 0) {
+            elapsed_us = zmq_stopwatch_intermediate (watch);
+            if (elapsed_us >= duration_sec * 1E6)
+                break;
+        }
     }
 
-    elapsed = zmq_stopwatch_stop (watch);
-    if (elapsed == 0)
-        elapsed = 1;
+    elapsed_us = zmq_stopwatch_stop (watch);
+    if (elapsed_us == 0)
+        elapsed_us = 1;
 
     rc = zmq_msg_close (&msg);
     if (rc != 0) {
@@ -141,9 +157,10 @@ int main (int argc, char *argv[])
         return -1;
     }
 
-    throughput = ((double) message_count / (double) elapsed * 1000000);
-    megabits = ((double) throughput * message_size * 8) / 1000000;
+    throughput = ((double) message_count / (double) elapsed_us * 1E6);
+    megabits = ((double) throughput * message_size * 8) / 1E6;
 
+    printf ("elapsed: %.6f [s]\n", (double) elapsed_us / 1E6);
     printf ("message size: %d [B]\n", (int) message_size);
     printf ("message count: %d\n", (int) message_count);
     printf ("mean throughput: %d [msg/s]\n", (int) throughput);
