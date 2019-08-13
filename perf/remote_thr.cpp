@@ -187,6 +187,13 @@ int main (int argc, char *argv[])
     if (set_batching (s) != 0)
         return -1;
 
+    int linger = 0;
+    rc = zmq_setsockopt (s, ZMQ_LINGER, &linger, sizeof (linger));
+    if (rc != 0) {
+        printf ("error in zmq_setsockoopt: %s\n", zmq_strerror (errno));
+        return -1;
+    }
+
     rc = zmq_connect (s, connect_to);
     if (rc != 0) {
         printf ("error in zmq_connect: %s\n", zmq_strerror (errno));
@@ -233,6 +240,8 @@ int main (int argc, char *argv[])
                         zmq_strerror (errno));
             else
                 printf ("error in zmq_sendmsg: %s\n", zmq_strerror (errno));
+
+            zmq_msg_close (&msg);
             break;
         }
         rc = zmq_msg_close (&msg);
