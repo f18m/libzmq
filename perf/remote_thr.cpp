@@ -260,6 +260,10 @@ int main (int argc, char *argv[])
     }
 #endif
 
+    printf ("small writes: %d\n", zmq_ctx_get (ctx, ZMQ_SMALL_WRITES));
+    printf ("med writes: %d\n", zmq_ctx_get (ctx, ZMQ_MEDIUM_WRITES));
+    printf ("large writes: %d\n", zmq_ctx_get (ctx, ZMQ_LARGE_WRITES));
+
     rc = zmq_close (s);
     if (rc != 0) {
         printf ("error in zmq_close: %s\n", zmq_strerror (errno));

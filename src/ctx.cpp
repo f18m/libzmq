@@ -55,6 +55,9 @@
 #define ZMQ_CTX_TAG_VALUE_GOOD 0xabadcafe
 #define ZMQ_CTX_TAG_VALUE_BAD 0xdeadbeef
 
+extern uint64_t __attribute__ ((visibility ("default"))) g_reads[3];
+extern uint64_t __attribute__ ((visibility ("default"))) g_writes[3];
+
 int clipped_maxsocket (int max_requested_)
 {
     if (max_requested_ >= zmq::poller_t::max_fds ()
@@ -268,6 +271,18 @@ int zmq::ctx_t::get (int option_)
         rc = _max_msgsz;
     else if (option_ == ZMQ_MSG_T_SIZE)
         rc = sizeof (zmq_msg_t);
+    else if (option_ == ZMQ_SMALL_READS)
+        rc = g_reads[0];
+    else if (option_ == ZMQ_MEDIUM_READS)
+        rc = g_reads[1];
+    else if (option_ == ZMQ_LARGE_READS)
+        rc = g_reads[2];
+    else if (option_ == ZMQ_SMALL_WRITES)
+        rc = g_writes[0];
+    else if (option_ == ZMQ_MEDIUM_WRITES)
+        rc = g_writes[1];
+    else if (option_ == ZMQ_LARGE_WRITES)
+        rc = g_writes[2];
     else if (option_ == ZMQ_ZERO_COPY_RECV) {
         rc = _zero_copy;
     } else {

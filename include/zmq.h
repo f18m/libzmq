@@ -223,6 +223,14 @@ ZMQ_EXPORT void zmq_version (int *major_, int *minor_, int *patch_);
 #define ZMQ_THREAD_AFFINITY_CPU_REMOVE 8
 #define ZMQ_THREAD_NAME_PREFIX 9
 
+#define ZMQ_SMALL_READS 10
+#define ZMQ_MEDIUM_READS 11
+#define ZMQ_LARGE_READS 12
+
+#define ZMQ_SMALL_WRITES 13
+#define ZMQ_MEDIUM_WRITES 14
+#define ZMQ_LARGE_WRITES 15
+
 /*  Default for new contexts                                                  */
 #define ZMQ_IO_THREADS_DFLT 1
 #define ZMQ_MAX_SOCKETS_DFLT 1023
@@ -644,7 +652,7 @@ ZMQ_EXPORT void zmq_threadclose (void *thread_);
 /*  change at ANY time until declared stable.                                 */
 /******************************************************************************/
 
-#ifdef ZMQ_BUILD_DRAFT_API
+//#ifdef ZMQ_BUILD_DRAFT_API
 
 /*  DRAFT Socket types.                                                       */
 #define ZMQ_SERVER 12
@@ -740,8 +748,7 @@ ZMQ_EXPORT int zmq_socket_monitor_versioned (
   void *s_, const char *addr_, uint64_t events_, int event_version_, int type_);
 ZMQ_EXPORT int zmq_socket_monitor_pipes_stats (void *s);
 
-#endif // ZMQ_BUILD_DRAFT_API
-
+//#endif // ZMQ_BUILD_DRAFT_API
 
 #undef ZMQ_EXPORT
 

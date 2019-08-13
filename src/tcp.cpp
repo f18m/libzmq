@@ -54,6 +54,13 @@
 #include <TargetConditionals.h>
 #endif
 
+
+extern "C" {
+uint64_t __attribute__ ((visibility ("default"))) g_reads[3] = {0};
+uint64_t __attribute__ ((visibility ("default"))) g_writes[3] = {0};
+}
+
+
 int zmq::tune_tcp_socket (fd_t s_)
 {
     //  Disable Nagle's algorithm. We are doing data batching on 0MQ level,
@@ -238,6 +245,15 @@ int zmq::tcp_write (fd_t s_, const void *data_, size_t size_)
     return nbytes;
 
 #else
+
+    // quick and dirty stats
+    if (size_ < 500 * 1024)
+        g_writes[0]++;
+    else if (size_ < 1024 * 1024)
+        g_writes[1]++;
+    else
+        g_writes[2]++;
+
     ssize_t nbytes = send (s_, static_cast<const char *> (data_), size_, 0);
 
     //  Several errors are OK. When speculative write is being done we may not
@@ -294,6 +310,14 @@ int zmq::tcp_read (fd_t s_, void *data_, size_t size_)
     return rc == SOCKET_ERROR ? -1 : rc;
 
 #else
+
+    // quick and dirty stats
+    if (size_ < 500 * 1024)
+        g_reads[0]++;
+    else if (size_ < 1024 * 1024)
+        g_reads[1]++;
+    else
+        g_reads[2]++;
 
     const ssize_t rc = recv (s_, static_cast<char *> (data_), size_, 0);
 

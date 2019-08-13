@@ -34,7 +34,10 @@
 
 // keys are arbitrary but must match remote_lat.cpp
 const char server_prvkey[] = "{X}#>t#jRGaQ}gMhv=30r(Mw+87YGs+5%kh=i@f8";
-
+/*
+extern uint64_t g_small_reads;
+extern uint64_t g_medium_reads;
+extern uint64_t g_large_reads;*/
 
 int main (int argc, char *argv[])
 {
@@ -165,6 +168,10 @@ int main (int argc, char *argv[])
     printf ("message count: %d\n", (int) message_count);
     printf ("mean throughput: %d [msg/s]\n", (int) throughput);
     printf ("mean throughput: %.3f [Mb/s]\n", (double) megabits);
+
+    printf ("small reads: %d\n", zmq_ctx_get (ctx, ZMQ_SMALL_READS));
+    printf ("med reads: %d\n", zmq_ctx_get (ctx, ZMQ_MEDIUM_READS));
+    printf ("large reads: %d\n", zmq_ctx_get (ctx, ZMQ_LARGE_READS));
 
     rc = zmq_close (s);
     if (rc != 0) {
