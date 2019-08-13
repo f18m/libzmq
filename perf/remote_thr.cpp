@@ -131,7 +131,7 @@ int main (int argc, char *argv[])
     int curve = 0;
     int zmq_bg_threads = 1;
 
-    if (argc != 4 && argc != 5) {
+    if (argc != 3 && argc != 4 && argc != 5) {
         printf ("usage: remote_thr <connect-to> <message-size> "
                 "[<enable_curve>] [<num_bg_threads>]\n");
         return 1;
