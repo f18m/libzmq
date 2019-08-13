@@ -21,6 +21,26 @@ import os
 
 # functions
 
+def get_theoretical_Mpps(message_size_bytes, tcp_link_speed_gbps):
+        
+    # see https://kb.juniper.net/InfoCenter/index?page=content&id=KB14737
+    
+    # convert Gbps -> bytes per second
+    link_speed_in_bytes_per_sec = tcp_link_speed_gbps * 1000000000 / 8
+    
+    # computation of all overheads over a PHY ethernet link:
+    #         14 = ethernet header
+    #         4 = ethernet FCS
+    #         8 = PHY preamble
+    #         12 = PHY inter-frame gap (IFG)
+    #         20 = minimal IPv4 header
+    #         20 = minimal TCP header
+    ethernet_ipv4_tcp_overhead = 14+4+8+12+20+20
+     
+    pps_theoretical_on_ethernet = [(link_speed_in_bytes_per_sec/(x+ethernet_ipv4_tcp_overhead)) for x in message_size_bytes]
+    return np.asarray(pps_theoretical_on_ethernet) / 1e6
+
+
 def plot_throughput(csv_filename, title, is_tcp=False, tcp_link_speed_gbps=10):
     message_size_bytes, message_count, pps, mbps = np.loadtxt(csv_filename, delimiter=',', unpack=True)
 
@@ -31,8 +51,10 @@ def plot_throughput(csv_filename, title, is_tcp=False, tcp_link_speed_gbps=10):
     color = 'tab:red'
     ax1.set_xlabel('Message size [B]')
     ax1.set_ylabel('PPS [Mmsg/s]', color=color)
-    ax1.semilogx(message_size_bytes, pps / 1e6, label='PPS [Mmsg/s]', marker='x', color=color)
+    ax1.semilogx(message_size_bytes, pps / 1e6, label='PPS measured [Mmsg/s]', marker='x', color=color)
+    ax1.semilogx(message_size_bytes, get_theoretical_Mpps(message_size_bytes, tcp_link_speed_gbps), label='PPS upper bound [Mmsg/s]', marker='v', color=color)
     ax1.tick_params(axis='y', labelcolor=color)
+    ax1.legend()
 
     # GBPS axis
     color = 'tab:blue'
@@ -87,6 +109,7 @@ INPUT_FILE_PUBSUBPROXY_INPROC_THROUGHPUT = result_dir + "/pubsubproxy_inproc_thr
 
 # generate plots
 plot_throughput(INPUT_FILE_PUSHPULL_TCP_THROUGHPUT, 'ZeroMQ PUSH/PULL socket throughput, TCP transport', is_tcp=True, tcp_link_speed_gbps=tcp_link_speed_gbps)
-plot_throughput(INPUT_FILE_PUSHPULL_INPROC_THROUGHPUT, 'ZeroMQ PUSH/PULL socket throughput, INPROC transport')
-plot_throughput(INPUT_FILE_PUBSUBPROXY_INPROC_THROUGHPUT, 'ZeroMQ PUB/SUB PROXY socket throughput, INPROC transport')
-plot_latency(INPUT_FILE_REQREP_TCP_LATENCY, 'ZeroMQ REQ/REP socket latency, TCP transport')
+
+# plot_throughput(INPUT_FILE_PUSHPULL_INPROC_THROUGHPUT, 'ZeroMQ PUSH/PULL socket throughput, INPROC transport')
+# plot_throughput(INPUT_FILE_PUBSUBPROXY_INPROC_THROUGHPUT, 'ZeroMQ PUB/SUB PROXY socket throughput, INPROC transport')
+# plot_latency(INPUT_FILE_REQREP_TCP_LATENCY, 'ZeroMQ REQ/REP socket latency, TCP transport')
