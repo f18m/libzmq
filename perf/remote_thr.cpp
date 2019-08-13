@@ -233,7 +233,7 @@ int main (int argc, char *argv[])
                         zmq_strerror (errno));
             else
                 printf ("error in zmq_sendmsg: %s\n", zmq_strerror (errno));
-            return -1;
+            break;
         }
         rc = zmq_msg_close (&msg);
         if (rc != 0) {
