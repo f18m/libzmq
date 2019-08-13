@@ -129,20 +129,24 @@ int main (int argc, char *argv[])
     int i;
     zmq_msg_t msg;
     int curve = 0;
+    int zmq_bg_threads = 1;
 
-    if (argc != 4 && argc != 5) {
+    if (argc != 4 && argc != 5 && argc != 6) {
         printf ("usage: remote_thr <connect-to> <message-size> "
-                "<message-count> [<enable_curve>]\n");
+                "<message-count> [<enable_curve>] [<num_bg_threads>]\n");
         return 1;
     }
     connect_to = argv[1];
     message_size = atoi (argv[2]);
     message_count = atoi (argv[3]);
-    if (argc >= 5 && atoi (argv[4])) {
-        curve = 1;
+    if (argc >= 5) {
+        curve = atoi (argv[4]);
+    }
+    if (argc >= 6) {
+        zmq_bg_threads = atoi (argv[5]);
     }
 
-    ctx = zmq_init (1);
+    ctx = zmq_init (zmq_bg_threads);
     if (!ctx) {
         printf ("error in zmq_init: %s\n", zmq_strerror (errno));
         return -1;
