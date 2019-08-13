@@ -48,11 +48,11 @@ class metadata_t
     //  property is not found.
     const char *get (const std::string &property_) const;
 
-    void add_ref ();
+    inline void add_ref () { _ref_cnt.add (1); }
 
     //  Drop reference. Returns true iff the reference
     //  counter drops to zero.
-    bool drop_ref ();
+    inline bool drop_ref () { return !_ref_cnt.sub (1); }
 
   private:
     metadata_t (const metadata_t &);

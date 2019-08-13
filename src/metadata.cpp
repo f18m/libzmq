@@ -46,13 +46,3 @@ const char *zmq::metadata_t::get (const std::string &property_) const
     }
     return it->second.c_str ();
 }
-
-void zmq::metadata_t::add_ref ()
-{
-    _ref_cnt.add (1);
-}
-
-bool zmq::metadata_t::drop_ref ()
-{
-    return !_ref_cnt.sub (1);
-}
