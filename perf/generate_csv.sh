@@ -169,7 +169,7 @@ set_reproducible_tcp_kernel_buff_size
 
 THROUGHPUT_CSV_HEADER_LINE="# message_size,message_count,PPS[msg/s],throughput[Mb/s]"
 
-if [[ $BENCHMARKS =~ *"tcp"* ]]; then
+if [[ $BENCHMARKS =~ .*"tcp".* ]]; then
     # PUSH/PULL TCP throughput CSV file:
     TEST_ENDPOINT="$LOCAL_TEST_ENDPOINT"
     generate_output_file "local_thr" "remote_thr" \
@@ -188,7 +188,7 @@ if [[ $BENCHMARKS =~ *"tcp"* ]]; then
         "# message_size,message_count,latency[us]"
 fi
 
-if [[ $BENCHMARKS =~ *"inproc"* ]]; then
+if [[ $BENCHMARKS =~ .*"inproc".* ]]; then
     # PUSH/PULL INPROC throughput CSV file:
     # NOTE: in this case there is no remote utility to run and no ENDPOINT to provide:
     TEST_ENDPOINT=""  # inproc does not require any endpoint
