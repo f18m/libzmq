@@ -31,6 +31,7 @@ NUM_MSGS="${NUM_MSGS:-10000000}"
 OUTPUT_DIR="results"
 OUTPUT_FILE_PREFIX="results.txt"
 OUTPUT_FILE_CSV_PREFIX="results.csv"
+CWD="$(cd -P -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
 
 
 # utility functions:
@@ -38,6 +39,7 @@ OUTPUT_FILE_CSV_PREFIX="results.csv"
 function print_config()
 {
     echo "*** Benchmarking configuration: ***"
+    echo "CWD=$CWD"
     echo "REMOTE_IP_SSH=$REMOTE_IP_SSH"
     echo "REMOTE_LIBZMQ_PATH=$REMOTE_LIBZMQ_PATH"
     echo "LOCAL_TEST_ENDPOINT=$LOCAL_TEST_ENDPOINT"
@@ -138,7 +140,7 @@ function generate_output_file()
         echo "Running repetition $RUN_IDX/$NUM_REPETITIONS"
         for MESSAGE_SIZE in ${MESSAGE_SIZE_ARRAY[@]}; do
             echo "Launching locally the utility [$LOCAL_PERF_UTIL] for messages ${MESSAGE_SIZE}B long"
-            ./$LOCAL_PERF_UTIL $TEST_ENDPOINT $MESSAGE_SIZE $NUM_MESSAGES >${OUTPUT_FILE_TXT}-${MESSAGE_SIZE} &
+            $CWD/$LOCAL_PERF_UTIL $TEST_ENDPOINT $MESSAGE_SIZE $NUM_MESSAGES >${OUTPUT_FILE_TXT}-${MESSAGE_SIZE} &
 
             if [ ! -z "$REMOTE_PERF_UTIL" ]; then
                 run_remote_perf_util $MESSAGE_SIZE $REMOTE_PERF_UTIL $NUM_MESSAGES
